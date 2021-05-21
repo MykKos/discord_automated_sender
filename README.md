@@ -9,13 +9,19 @@ As one example usages, you can build an interface, where the user will build the
 
 ### How is it works?
 
-You should pass all message objects with channels where they need to send as an array.
+You should pass all post objects with channels where they need to send as an array.
+Each post can have an unlimited amount of messages.
 Message object detailed [here](https://discord.com/developers/docs/resources/channel#create-message).
+
 ```json
 {
     "posts":[
         {
-            "post": "[{\"content\":\"hello\"}]",
+            "post": "[
+              {\"content\":\"Message #1\"},
+              {\"content\":\"Message #2\"},
+              {\"content\":\"Message #3\"},
+            ]",
             "channel": "845194299906064415"
         }
     ]
