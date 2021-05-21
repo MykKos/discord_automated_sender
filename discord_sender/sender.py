@@ -77,9 +77,12 @@ class Sender:
     def send_from_queue(self, queue: Queue, channel: str):
         queue_element = queue.get()
         post_string = queue_element[2].decode('utf-8')
-        post = json.loads(post_string)
-        for message in post:
-            self.ds.discord_request(message, channel)
+        try:
+            post = json.loads(post_string)
+            for message in post:
+                self.ds.discord_request(message, channel)
+        except Exception:
+            pass
         self.sent_back(queue_element[1])
         self.delete_from_queue(queue_element[0])
         print('Success!')
