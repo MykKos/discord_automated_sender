@@ -1,0 +1,53 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+  db:
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=db_db
+      - POSTGRES_USER=db_user
+      - POSTGRES_PASSWORD=db_pass
+    ports:
+      - "5432:5432"
+  poster:
+    build: .
+    command: bash -c "python manage.py migrate &&
+                      python manage.py wait_for_db &&
+                      python manage.py check_on_redis &&
+                      python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DB_HOST=db
+      - DB_NAME=db_db
+      - DB_USER=db_user
+      - DB_PASS=db_pass
+  discord:
+    build: ./discord_sender
+    environment:
+      - DISCORD_USER_AUTH=discord_auth
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    command: 'python sender.py'
+    depends_on:
+      - redis
+  db_update:
+    build: ./update_posted
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    command: 'python update.py'
+    depends_on:
+      - redis
+      - poster
